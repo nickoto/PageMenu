@@ -10,6 +10,15 @@ import UIKit
 
 class ViewController: UIViewController {
     
+    lazy var myData: [(String, Int)] = {
+        var data = [(String, Int)]()
+        
+        data = [("Friends", 0), ("Enemies", 0), ("Schmoes", 0), ("Friends", 0), ("Mood", 1), ("Music", 2), ("Favorites", 3),("Something", 0), ("Wicked", 1), ("This", 2), ("Way", 3)]
+        
+        return data
+    }()
+    
+
     var pageMenu : CAPSPageMenu?
     
     override func viewDidAppear(animated: Bool) {
@@ -25,26 +34,31 @@ class ViewController: UIViewController {
         self.navigationController?.navigationBar.tintColor = UIColor.whiteColor()
         self.navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.orangeColor()]
         
-        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "<-", style: UIBarButtonItemStyle.Done, target: self, action: "didTapGoToLeft")
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "->", style: UIBarButtonItemStyle.Done, target: self, action: "didTapGoToRight")
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "<-", style: UIBarButtonItemStyle.Done, target: self, action: #selector(ViewController.didTapGoToLeft))
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "->", style: UIBarButtonItemStyle.Done, target: self, action: #selector(ViewController.didTapGoToRight))
         
         // MARK: - Scroll menu setup
-        
+
+        /*
         // Initialize view controllers to display and place in array
         var controllerArray : [UIViewController] = []
         
+        for j in 1...8 {
+        
         let controller1 : TestTableViewController = TestTableViewController(nibName: "TestTableViewController", bundle: nil)
-        controller1.title = "FRIENDS"
+        controller1.title = "FRIENDS\(j)"
         controllerArray.append(controller1)
         let controller2 : TestCollectionViewController = TestCollectionViewController(nibName: "TestCollectionViewController", bundle: nil)
-        controller2.title = "MOOD"
+        controller2.title = "MOOD\(j)"
         controllerArray.append(controller2)
         let controller3 : TestViewController = TestViewController(nibName: "TestViewController", bundle: nil)
-        controller3.title = "MUSIC"
+        controller3.title = "MUSIC\(j)"
         controllerArray.append(controller3)
         let controller4 : TestViewController = TestViewController(nibName: "TestViewController", bundle: nil)
-        controller4.title = "FAVORITES"
+        controller4.title = "FAVORITES\(j)"
         controllerArray.append(controller4)
+        }
+        */
         
         // Customize menu (Optional)
         let parameters: [CAPSPageMenuOption] = [
@@ -59,7 +73,7 @@ class ViewController: UIViewController {
         ]
         
         // Initialize scroll menu
-        pageMenu = CAPSPageMenu(viewControllers: controllerArray, frame: CGRectMake(0.0, 0.0, self.view.frame.width, self.view.frame.height), pageMenuOptions: parameters)
+        pageMenu = CAPSPageMenu(dataSource: self, frame: CGRectMake(0.0, 0.0, self.view.frame.width, self.view.frame.height), pageMenuOptions: parameters)
 
 		self.addChildViewController(pageMenu!)
         self.view.addSubview(pageMenu!.view)
@@ -78,7 +92,7 @@ class ViewController: UIViewController {
     func didTapGoToRight() {
         let currentIndex = pageMenu!.currentPageIndex
         
-        if currentIndex < pageMenu!.controllerArray.count {
+        if currentIndex < pageMenu!.menuItems.count {
             pageMenu!.moveToPage(currentIndex + 1)
         }
     }
@@ -93,4 +107,65 @@ class ViewController: UIViewController {
 	}
 }
 
+extension ViewController: PageMenuDataSource {
+    
+    func pageTitlesForPageMenu(pageMenu: CAPSPageMenu) -> [String] {
+        return myData.map({ return $0.0 })
+    }
+    
+    func pageMenu(pageMenu: CAPSPageMenu, viewControllerForReuseIdentifier reuseIdentifier: String) -> UIViewController {
+        switch reuseIdentifier {
+        case "FriendsTable":
+            let controller: TestTableViewController = TestTableViewController(nibName: "TestTableViewController", bundle: nil)
+            controller.title = "FRIENDS"
+            return controller
+
+        case "MoodTable":
+            let controller : TestCollectionViewController = TestCollectionViewController(nibName: "TestCollectionViewController", bundle: nil)
+            controller.title = "MOOD"
+            return controller
+
+        case "MusicTable":
+            let controller3 : TestViewController = TestViewController(nibName: "TestViewController", bundle: nil)
+            controller3.title = "MUSIC"
+            return controller3
+
+        case "FavoritesTable":
+            let controller3 : TestViewController = TestViewController(nibName: "TestViewController", bundle: nil)
+            controller3.title = "MUSIC"
+            return controller3
+            
+        default:
+            let controller: TestTableViewController = TestTableViewController(nibName: "TestTableViewController", bundle: nil)
+            controller.title = "FRIENDS"
+            return controller
+        }
+    }
+    
+    func pageMenu(pageMenu: CAPSPageMenu, viewControllerForIndex index: Int) -> UIViewController {
+        let data = myData[index]
+
+        let reuseIdentifier: String = {
+            switch data.1 {
+            case 0: return "FriendsTable"
+            case 1: return "MoodTable"
+            case 2: return "MusicTable"
+            case 3: return "FavoritesTable"
+            default: return "FriendsTable"
+            }
+        }()
+        
+        
+        let vc = pageMenu.viewControllerForReuseIdentifier(reuseIdentifier)
+        
+        if let controller = vc as? TestViewController {
+            controller.text = "Page is at index \(index + 1)"
+        } else if let controller = vc as? TestTableViewController {
+            controller.randomize()
+        }
+        
+        // Would configure vc here.
+        return vc
+    }
+}
 

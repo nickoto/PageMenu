@@ -12,6 +12,12 @@ class TestViewController: UIViewController {
 
     @IBOutlet var titleLabel: UILabel!
     
+    var text: String = "" {
+        didSet {
+            titleLabel?.text = text
+        }
+    }
+    
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     }
@@ -24,6 +30,7 @@ class TestViewController: UIViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        titleLabel?.text = text
     }
 
     override func didReceiveMemoryWarning() {
