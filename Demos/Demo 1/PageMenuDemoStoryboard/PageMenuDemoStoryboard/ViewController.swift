@@ -13,13 +13,13 @@ class ViewController: UIViewController {
     lazy var myData: [(String, Int)] = {
         var data = [(String, Int)]()
         
-        data = [("Friends", 0), ("Enemies", 0), ("Schmoes", 0), ("Friends", 0), ("Mood", 1), ("Music", 2), ("Favorites", 3),("Something", 0), ("Wicked", 1), ("This", 2), ("Way", 3)]
+        data = [("Friends", 0), ("Enemies", 0)]
         
         return data
     }()
     
 
-    var pageMenu : CAPSPageMenu?
+    var pageMenu : PageMenu?
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
@@ -61,7 +61,7 @@ class ViewController: UIViewController {
         */
         
         // Customize menu (Optional)
-        let parameters: [CAPSPageMenuOption] = [
+        let parameters: [PageMenuOption] = [
             .ScrollMenuBackgroundColor(UIColor(red: 30.0/255.0, green: 30.0/255.0, blue: 30.0/255.0, alpha: 1.0)),
             .ViewBackgroundColor(UIColor(red: 20.0/255.0, green: 20.0/255.0, blue: 20.0/255.0, alpha: 1.0)),
             .SelectionIndicatorColor(UIColor.orangeColor()),
@@ -73,7 +73,7 @@ class ViewController: UIViewController {
         ]
         
         // Initialize scroll menu
-        pageMenu = CAPSPageMenu(dataSource: self, frame: CGRectMake(0.0, 0.0, self.view.frame.width, self.view.frame.height), pageMenuOptions: parameters)
+        pageMenu = PageMenu(dataSource: self, frame: CGRectMake(0.0, 0.0, self.view.frame.width, self.view.frame.height), pageMenuOptions: parameters)
 
 		self.addChildViewController(pageMenu!)
         self.view.addSubview(pageMenu!.view)
@@ -82,19 +82,26 @@ class ViewController: UIViewController {
     }
     
     func didTapGoToLeft() {
+        /*
         let currentIndex = pageMenu!.currentPageIndex
         
         if currentIndex > 0 {
             pageMenu!.moveToPage(currentIndex - 1)
-        }
+        }*/
+        myData.removeAtIndex(random() % myData.count)
+        pageMenu?.reloadData()
     }
     
     func didTapGoToRight() {
+        /*
         let currentIndex = pageMenu!.currentPageIndex
         
         if currentIndex < pageMenu!.menuItems.count {
             pageMenu!.moveToPage(currentIndex + 1)
-        }
+        }*/
+        
+        myData.append(("Something \(random() % 1024)", random() % 4))
+        pageMenu?.reloadData()
     }
 	
 	// MARK: - Container View Controller
@@ -109,11 +116,11 @@ class ViewController: UIViewController {
 
 extension ViewController: PageMenuDataSource {
     
-    func pageTitlesForPageMenu(pageMenu: CAPSPageMenu) -> [String] {
+    func pageTitlesForPageMenu(pageMenu: PageMenu) -> [String] {
         return myData.map({ return $0.0 })
     }
     
-    func pageMenu(pageMenu: CAPSPageMenu, viewControllerForReuseIdentifier reuseIdentifier: String) -> UIViewController {
+    func pageMenu(pageMenu: PageMenu, newViewControllerInstanceForReuseIdentifier reuseIdentifier: String) -> UIViewController {
         switch reuseIdentifier {
         case "FriendsTable":
             let controller: TestTableViewController = TestTableViewController(nibName: "TestTableViewController", bundle: nil)
@@ -142,7 +149,7 @@ extension ViewController: PageMenuDataSource {
         }
     }
     
-    func pageMenu(pageMenu: CAPSPageMenu, viewControllerForIndex index: Int) -> UIViewController {
+    func pageMenu(pageMenu: PageMenu, viewControllerForIndex index: Int) -> UIViewController {
         let data = myData[index]
 
         let reuseIdentifier: String = {
